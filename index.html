@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <title>Text Eingabe mit Buttons</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .top-input,
+        .bottom-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            font-size: 16px;
+            resize: none;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px 0;
+        }
+        .buttons button {
+            padding: 10px 20px;
+           /*font-size: 16px;*/
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="container">
+        <textarea id="top-input" rows="5" placeholder="Eingabe oben"></textarea>
+        <div class="buttons">
+            <button id="decode">↓ Decode</button>
+            <button id="encode">↑ Encode</button>
+            <button id="fromC">from Clipboard</button>
+            <button id="toC">to Clipboard</button>
+            <button id="afk">100k afk</button>
+        </div>
+        <textarea id="bottom-input" rows="5" placeholder="Eingabe unten"></textarea>
+    </div>
+
+    <script>
+    var encodedStringAtoB = 'SDRzSUFBQUFBQUFBQTgwOGFXL2p1cTUvWlpCUDd3MTZBaS95MW05ZFp3cTAwOTR1OXp6Z1lCQzRzWklhZGF4Y0wrM2tGUFBmTHluSnRyekljV2Q1T01Vc3RVU0tJa1ZTbEVqN2JiWk8yR09ZekE3ZlpqbGRzalRLYjVKd1I2UFpvZXNRWSs3N25vRS94UFR0ZzFtNExPSVhldGVHSTc1RjVvNXRjVGpMdDV5RFdSRnY2RTFNbHpRL1lXbGViaERNREF6WG05dWVFK0NQWXhOeU1NdUxNQ3Z1QVJoKzJXd0J4ak05NGdjazhJbGxBcm50OXQ4MHkyT1dkbUJNeTRJL1J0Q0N1U3V5T0YzUERtZm0zSnFiN3V4Z0Z1Zm5aWkpVM2VFTG5SMFdXVWx4ZnN2bkUxYW1CUXhubVE2eERtWXBmZjBVd3F5VE1uOUlFN1o4eGptdndpU25yVDZKWmJRYXI4SnZ2S2xnUlpnY001YmVzRGd0OHJNd1MzRVVnODhTeEZXc1dMYUJDWVpwbExFNGdobW1ySWhYOFRJc1lJTDU3UEN2dHhrMEg4Nk11ZXNIdmg5NElBblA5a0ZjQUx2T1dBbjh6ejdUWkl2TUZSVEh5b3N5MnQwdE0wcFRoT0dMV1V2clBvdlhhNXB4OFJ2bUhOWW1xSDVjNy90QlRjM3hMR0xadnV2NnJ1VTVSRXVzV2RjOXRKeTVhOWdOTFlVVXNZZ0xwR3o4NHdRQXBTVVdweTgwTFZnMmhUdVkrOXcycklxZ2JTb1ViWVBZanVHNWhoT1lwbW1iZXU2eU1NMDNaY0ZYNHllSmdybTRqZ0drUFFJSzdXdHB2c1ovaDFtVVQ2QkdmSE51VzU0azVuc3VVY2g1dnUxNWdlOVlOZ2tNRXVpRkt1bGR2OURzSmFhdlAwN1JESWhwT1ladk9MNExCdW00KzBoZWhqdFdGajlPa0hpMjRUdmdIMEJyZkh1dlJFL0EzTU5pWEUvSEdiVEJLaXhpZTZDcW5tWHFDZEp2MjRSbFU1WEdORndUdkdWbEhMN1ZNZzdITjBCRmlRVXJhZmxFcjZvS3pVbExPVW8xc0FMUDhFMVlTNTk0b0xoVHFENWMvRGc5eXlURXRnMERnTUErSEdlU2FHOVl1WHo2Q2NrYWptMkNPUVllY21oTUlua2M1dkh5cnRpblJlTjBRYTYyajE3QWRzQVRtSjZXY0VhTE9LTWJjSG5qMUd6aXptRm5sdFJVSjI1YlFNVjM0Zi9Bc1FJdG9XMFdiOEpzZDViOERESGZoWmdBOWliWWd4M2ltSHJyWDdMTmxxWlJYRzVHS1RsR1lNOXhQUDdqdU5iM3I3QnJsZ1Y3eUtsWWVybDFZOXN5ekFzZXNJQ05SN0R0aHdWZHg3QW5IYjU5UDVndHl5d0R2bVR6RHVHeU1xR3QzUlVjRi9GYzJBTmQxK1U2QVhPTDRqeDhUSlJkWHpxU296eVAxM3dmaDJnajM5SWt1WWlVellMK1FZVWd3K1R1Q2VEUFlSRmhOSXlRNG1wWEIxYm9OMERBQ1NveU5Dd0Q3YzBodHVFU3l5WDJwRmxZNml4b3Vud0swK0lxVE1PN0xialhmQ0pwei9JTTBFZlRzMXdYS0R1VEtOc3FaYVNiMHVSUEVISTJrYWp0V2lCNDE3UEJoVHNRS0U2VCtoQy85K3BPUFpHNjVUcm80d0liWEU3Z0c5WVA4Q3lwbjRTdzJMdDhzckF0Q0lXSVFZZ0x3YS92T2NZMHlrTjgzNFVKQlllVUpKUFgyVFo5RXJpMjR4RFR0RWp3Ni9RY2d0dmlhZklzTUZKd1BNY0did0ZoK3c5cjJ6a3J4NVVOSHJZMDI0UW40Q0Z1aGRXalQwZ2hVSWRSVHVrcUxKTmlCaTBKQUZRdTRpS05LQWJ3MEJ6UngzSjk5OFJlSDdZUjlPVTNOSVBUVGoxSjNuMEpxS0s3ZG1RNER6eVhPR1lBTFBxQmNkQThRYlRTUElIRnU4b1Q3UFhxa3hjb1QxWUxFbnk3OGtSYWVFU2xaem11LzdVMzAyTndrT2xaR3JWbS9EWjd4R1p4cEpKVDl3TVFaeHExMmdKRG5KankyeEtCY1dGN2lPQkxlNGpJK1Q1RUVJalRSZVJDMm9zSSt0eERSSG51Ui9UOFBpS0lmaStpTlRCVmE4cFViY3Z1SWVLQzdrVWtBenlTS1R5Uy9qcHlOZG1MNlBUWEVUV3FqZmlWZzhCaE8vOGM1M2hDRTJhNHljeFZFcTV6WWYydzY2WUR0d3JFSlhEY0pQV2h5ZGZjS3NEeGFXNjR0Z28zZEtzZ0R1TG5TUFk2dlcxQ0tHNzJROWNMam1tN25tRVNjSElaemNHZkxMbVRtTjFYZzBNczRudm0zSFBsdVFBbGladjZXWjZERjRadTJ6T0FLdmQvblRiY2h1SDN3SjJEcnpWaGt3azhpT05obmZrdVdRT2JvQTl6MkhjRGs5K1plQ1pBSE1WS3YwbDhPQXBBMkdqQ2lSeGlSdWcvWVRGNk83QXBDeGg3TE9PRXl4OW52cWsyZjN5UTBRL3lDZ0lyOFFMaW1pOHdZSEZBOU4wdFFGdUZzd0dNaW5uY3djS0dhOXFDRFZUWW9JR3Rkc1FXc0tNQ085OHJGMy95Rkc0ZUlXWVluVU5lYlhSdG5sb3NvWTVWK29aaDVtTllMTFpobWROb3NRblg4WEpSaE52YWMxTzhTMWdVVmNDNWtCc0t5RkRlOW1SVmdIblM3WW1xbmx1NmZLTFljQVYrbFdZODRoUTkzZEhySmVrTzNnUnEzY0VIaDhERkdod0NPL1lPa1lzVnpMc2ozTFhidGZoTHVhbzlDVlh4ei80SmxOR3VUNzFwMUdMV1VVY1h1eFg1N1J2bEVocVN4Y04ySWFKVURaU01QTHFVL213MWo2eFQ5a3g3SW1vQ3RTNStGZUNJNFhXajF0N283SVZyL2pBVU9EQWFacUNVV1cvMnQ3MHVMUzA0OFlacDlKbHRlc0sraFBZYjhKQlBZVTdibzREcHZZUlpqQ0VjTjcrb1ROZVVwWHkybi9BY2lDc1lwMkJFOSt3VjVvQWhySEFWUjFrUnI4RGpWd2VIaE9YRk9RTk9pdk9Fc1l4SGUwMGIyQXA3M2lVd0QzbWl6TzlZd2crbTZIeEVRSHIyYll2R3lGM25HM2ZWMEU4Z3pKeUQ5NGFnMjRLak9aRU9lM2JvK3NTYW16WTRaNWY0UHB5OHBIY0dGK1Y0OXB6ZzVZdGgrQzRjMjdsWGhrQ2NHQzFpTElYL2M0VVdJTldEbUhQY3FTUXQwY01Id1YrL1M5bi9xNlFsbFpFclBsOHZoWWVUTzFIZk5kWDdGaHdqTEFUcG9La2hzaFpORXRQQXp1cUQ4eFVzRkhnSERad3hFL3R3ZDBkRkVrcFBaek4zNXdBWE5EK3dOMjNETE56SThId2pTQ3JCUkxWYnFUNjBvdVVIY0d6VlNXRVBsaXFFdnBNZWxFRVBUQ01DVGtBdkF0T2RPelpwUk9DN1UyV2diZ0lxTVRJcUF6MVdUd2F0WFVZdkF4VnNSQWJrRjh1Z3U0dEpXcDVwZ21uclJEQ09wRXFndDBrT0NxQUxOY3kvR0Y3UHYrM1BBMC9rMC9oUE1JSDk3aVpja3lLV2JXaDl3U2hTeXhOMDkvaGhQOUNCMHJHUHcrdlpKK2JjdFJydVRZTk1XbjRsaHFnSmdSZjM5V3V2eFdndnZCcWNhRlpkQWRIeGpBT1A4RXptSmh5OGFwNm5zTndMZmlwYWdSYzR0bzd0UFZncTYvM29hcEQ5SHBoR0JKekFpTlZienR3MjNkcm9QWE9DRE5xaDJ5UUJqS0dvM0hlaXdrSFcyekMvZ2U5WmdoVDRMUjlJK2ZtZWZvTW9iNGJ4RUxZL2JDOHBUeDdmNFEwWVJrOGZQMzZocngvNGhWaitJUkdkaHg4L2Z2aDRKbTRHUCtDeDRJTTRXbno4OEQ5ODJoOHVYNnovN1ExNWtvVXJERi82eE00MjJ5cFk2L1hkeGtVWjhwbk1kRXZXaWFPbGxIekxkR3p0bW8zaXFJdldEZElIVjYwRFJIblUyRjg0MzdMNFBaZDI0UnpNVWRWWEQzNWc3VkhZTG1IVWx5NW5NN0dmcTRjRlpUcUIxcFdQb2JSMzh0WTVSTE9OcXpERFdpMkcvb1hDMFZxejc1akVjOTVselJMbGQxaXpHSHFFYjgrZiszYWQ3UGVKTzJETjlrUnIvdjh6eWtFeEJoYVlsL3N1eVV1VTN5RjVNYlJlOHBaanpiMm16TUt6ckFISmszK2M1TnRIZU1HcjR3ZU9ZMm05NFJpS0t2bk83Y0NnNU5zd2c1S1hRNDlJM2tXZDl5dkp1M1pMNThPTnFJV2FtUUV2R2NyQzF5UFpoQzN2a1V0ZzRZLzNIcmxVS0w5QkxuTG9FYmtFWkc0MXZvQ1l6cUJjYk5zdzIzTEJsdmRZYW1CYnhQZmZaYWtWeW0rd1ZEbjB5UG5HdGVad0JLamxNbVNvemovT1VBZHUwU3ArWVkzMTB0K0xweTdCMEZYZDREb01BR29XZ3hNWk9Ya1laQjRFWnIwWXpwVERkdjh1c0tabUcvcmo5ajQwVlJJRDE0MkRndWpENmVTQUpINnBIREJqRFBySlBjUkZEcEUxcUZDeVU2cFZaRktob0tCNUdkYlNyRlowS2U0RWV4VVpmQjQ4M1JIcktqWnl5ck5VbUJ5ejU0NWYzNVRaSW9rbis0SmVYeEZtYTRwbUpHbW81cllKMXlub2ZnU1l4dHpGVkVuR05rZDE4WXk0NE1XMkc4eVhpMGJKRm04Vk5UZXlKYVByR0ZNZVlJVjQ5cER0UE1rSG5qUXRoTldlOEVIKzZwV0dpRWU4Qmoxb0pmSy9Dakhmd2pLempiem9kakdQVmxkK2lwb2RFSE9qYjF5UTBDSjBwRldTVUJGc1ZoY21XSGxqaTljalRCMnFxbTRZSE1yMDNqV1dyQWdhSG9yd1pPcC95bmdyMDVhenozalp6UytIajFra002dEh5eVZvYVoxb2xZdkRMVmF0aDVKMVRtOURoUjlOSGswVUoyUGQydHdpTHRpUUlmOWFFNHREbnVJb29tbWxCQWVEOVZSOWN2N2NDVnpMTkF6NWwvd3d0WDdkMUFCemM2K3hlUjZ3VDZ5NTZaUHJWYS8wcVJFSFROTnZtTE1uRnJpMGlTbXJlY1B6bU0wc2xLcEVoZnpuR3pTWVZpK1dLNWE0M1gxaEtXcGR1eXVUZnNhb1BlNnBTTncwdVpmR0daK2xkTE9yL1ZiVGpsUXhpc2xMcnBXck1qbHJpR0RGREI5TU9OY3RkMHhIUzE3Qm1iRTE3RzQ1Sjc4S04zRVNoME5kRk9tT29GemtGK2x4dUh5K1phKzFjRU1PZmt2ek1sSFRLMWpsYzZSMDNaVDVFNDFxR1d6UmppNHdxL1NRMC95U3JtVGRnSnJhNHZkeDNQRUxKM3RLdytKcGNHSGs1blhKMWcxeDdoalJML0lxQkNXN0k5TkZsbXZPcmFDdXl2ZlFLaFIvZVdqWm9NaGUwKzg3YlJkNlNJZzM5K0RFN3BJQS85cThRcVc3dy9UM0ZaaDVHWit3elFhY1RkNU1GK1NOUzFxSnFGTVdnaEFvclFjSklNV1RQOGZib3ljYU5uSjlEYk10UHNCT0xKWXVMemNiaHRuQVk1RkVmRWlMT0tuQkh4bkxpL3lZbGV1bm9rbXJHWFVhemFpemE0Yk1waG5vQStNY2pRSExMdUpVVklKY3hpdUptTUIybk1WTC9pQlhESDc3ekpJZC82VW1mYmNOMFhmekJGL2xoQzlaR0FteFZXSTU2M1Jkc1NoZXhiTDhKRkdTcE0zYklYVUJBMWV2ZWgrYnRqMjhhMXQ2ejNiNFZabFlaVnUzcUx3WUpBUys1N3YxanlXU0UwV01vVStWL0pVMXczTGhGZDJYc1ZHbEVYaHZmcFFBVHUyeDlHdHEvc1kxclZ5R25CZDYxMnFwaEZ1UUM4YTVFYWVJNWdqQ01YaHBVbjJJNFBGaStFMktnUitaOG12d1V2U2xWWHBVSllhZEpoTnMxZng2a2w5UFZpR0NGVzdMZ2thWDR0eHlOcGJVTml3eW5OUjJkVWx0WWhKN2JybUI0eFBiUVVSMHluR3g0NHhMaytMbGt6eitxZzBXSlhVVXZZUkEvNTU5QVFEcDB5dDNpOTBGaHIvRk1VUDNMTnY1L2ZSU0h0UXFpUU9EajNGS3I4SnZGMXhSWlJmM3pYSXpiS29WVk1kamV5NEVLQml1dHl2V0R5VnplT2ZNc29TWE05V0ZRTEMyd0VyMk9jUkJlWG5YSDZJc1MxUGpvcTBEQXNoczhVNXdmZTBRNzlZWEVBM011bFZ6cG9WUzY4YTBRTzFhTlMxWXUwcnRuWlZOZytJYWgvNEZ4VkI2cWxyb242K2ZHaVE2Q3Z5ekZWZkR1amdHL0hNMVdob09kWkNESlYwRENxYlVXRTRwZXdJTHlHWEFPakt0UFRnd2pVVk9hYnBncXhVWUpsMXM2NWp5bmFWbmc5VEhvWCtzV2sxNCt4R2lnNUFEOHBaRm8rOHFleHNrT0FhcnI1UExGdE9LM1laTDZEU21yUVhWbDl4cHZkSlpwN2h1eElIMVFFSE85KzNybnorMmpDWFhxODV1TXdUWWU0L2svZlY5ZzdQZEIvOUxpZ0lIS2U4QjF4Y1N2cVAwY1ovcGo3QlN2N1U0a1pkUitMTmUvNWpQdTRJemNZRnZ2MmxtdDQwVGVyM2lscnFmNFJIZ1lRZkJJODBwbmtRQjVQZWczRlVLYUk1WW8yajVZRHlrS1hiakRBeENOUlRyL2dXK041alFvaUU0Q1VnNzNDTkx5M3dod3ZteEVZZmd0RUtUMGZjVStYWkIyeHBYbmRzK3dhbUc0bGNNOXF2Q0JKd2h6OVBEMHNZRjhhWk1pakNsck15YnNIWThRTmlITXEwNGUwU0tvM1hjSzl6NjhUZ3l5Y3BIb2ZVK1c3MVZtUUxmZmxOeEhBWDBNYVg1YzV4cTlhUmRRcjAzVHRnSGp5a1Q4Q25nUUJmT3R3VWMzbWhVYmhjMGxSZVgrb0FSV2s0WW5CL3pjUjBkQVZXY1RIK1NZOFkvQ2J4RG9qMlBzZEgzUVU2WSs3aW5tWW94enNFNGpRbkE0MHFydkdhNlQyTXptcTdiUG5BQTdBbVB1MjNOVTk4TzRMNXhJVjhoV0t6d3BxRXYrZmRqREVSSHhmWHF2dlZld3RTd2FocmliUXR3WDZEenlOZ3poSXNZSC9DYnM1RVpqSUEyeTk0R0d0UHlmWkRqQTQ4cjN3VGdQVzVxLzY2NkYwR3hoY0U5YWRRRlRNUVlkd1ZDUTZmN01RMzhORzcydUlQcFNGTjRlcGQvMDZGMDN4OVNYdTJ4c1Bvd3d2dmQrZ3RONnZORitrZkxGY2lyVVV0OVBmU1N2LzBOMjZocnVzcUxuRDUrd1FMdmIyOWE5NG5pR2xkemJUdHc0ZnVlQzE3QVBTOHpUTVJuOUV1Sjd6MTJYOW5FMTBPVkZ6Tnh5TzRMbUtaeDBIL1IwdW05VCttM1hwdTAxTUtXVXdncnhJVEsvazMrVEkwTFdyYlVDcmZxRThKMythRXJuZ0xDSTJWUnlOenBmOHA0K2Z6SXI5di8rdXZyVjd4L2YyRVFWdFBxU2gwVEtqS0wrQzhKS3o2Y2hVUHhmT01wWGNGU1UzNm5teWY4SHVkTlpoSHgvWkdnZGFkdjhOZkhjbFFoaDc4TXVnT3R1QVgrV2tqRTB5RmhXVVFHNEo5WWd0OHFhWEFNSFFibVBSOHpTdi9lM1lhUGozR2hJZ1dPRHN2ZzFkRnB0RTdpU0pTQzFKUFRvd2p0d1pOelhoMmRJMTduK0kvN1ROdlF1K0Q1RTZYWkRSb29OeHFSRTZ1OHhIVVdMaFBhZER3bTRkOHd3aDBHb0UwcnY5cy9qVmVyZUFuK2E5ZDBQS2ZzTlVWdGlXbCsveFFXcHhuYjF2clNlcWdWOWpWT29uVVc1bm1ucTYwMG9rVmRLWW1PTnBUdFJKNmhDOTVXQjQ3d1hiNnJpSGNCUjFGRW8zdDIwWlMwdkEwbEFDc0hQSkR1cSs4VzB1am9XK055RzJhSFVKWHpmRUw1V2U4bzI3Q3M0YkdXaDJpb09KUW9ETllUNUsvdVc1akJpWk5oYWkxSGdkN3NubGNKVmJUNEJlRXRlMnpXSTk5QnBKa3hGTVk2aXlOUnRGSTk4VlJsOHlXZlQ3eko2T1R2N3NXTDRLdFZrMDFTYXhsT21wMTBJSFRFMUJIYnlpK0l2TWs2cW5QOEtJYkYwOWZQOUpLdnNFeHJpVEtOODR4dGpsbFJzTTBWVFV1aDV0QkRUOE1OdU9tNkJLejZWQWo3d29xSG5INEowUlpQTS9pbnlaOHhlQUN1cVBUQ3AzR09EZ0dtbWpLc2NYdUMxaXVHcFZ1ektNeWVaNElPUDkvZjh6UVhmM1dVSDlQdVh1T3Rlc2ptamVvc0t4MVlGVmhZUkNNeHJwekh0aXhPcWlxRjY3U1BobVR2R1V1S2VOdmhETCtSd2llVVg2ZC9BcFQ0OGxtdWlreE9vN29KKzNkTVh4VVJJRUFUallnTjRqckZHOFNtWWlhTUMxNHBnRjl4M0gybXNMbEZ4M1RGTWlxdTRHZ3JIMWtweGxuNmhHbEx1YnRKZ0w4WjIwZ0hZcW9iSXhiRWlVdnE1bnRScyt2ejgxbFZDa21qaHd1dWw5eUd4TjJ1SEpOL2hPR1A3bVl0bllMYTEyemFsYTJKQW81WTRVQWdLSEdCT280U0gxVG1XRWE3UTlWeExISHk0RjRPUlNVTU92UUN0SjVtOXhkWFo0dWJpN09UczdzS3RzeHBmWE9hODl4Tlp4cWR3RUtkaWhKaHFNM2RVRU5xWTMwclBFaGFYbGhWdVdQT1U4dmxpYWFXY3hGTmluZXJHUmZ2UnRWOEgxZmgzZG4vM1Z4ZTN4N2RYMXgvNmVId2c4VWw3RnZYNlpvcFp0UUhPQWNQZ3JWRDlYUnJrTXBMTWZ5SWF0V3BsdWhVTGk5OFFiMnRkVXBTWXFESVhQdVBTN0NXTkQ5dTB0eVNZOHBYOURyakd4S1BvTUMzd1RMaklLcEozckJ0dVJVMmVWcmkxUjdlYnAzSDY2Zm1yaW9IcStYRVlDSktjZWVTZ25kcTF1VUN6MjRoK0ZhSW9kRnZmZ29Wb3hRZTVpb3piK2tydXZWcTZEQ0JWVXBCS0JpeFhGR1VRTng4T0FrSjg0Z1BEc2Y1azJDMWlTWXBCaFhveGVQOEhIeHZWVjMxWHlhY0Q0MmNWZ0FB';
+        // Your base64 encoded string
+        
+        
+     
+
+
+function decode (input)
+{
+  let decodedStr = atob(input);
+
+        // Step 2: Decode again from Base64
+        let decodedStr2 = atob(decodedStr);
+
+        // Convert the decoded string to a Uint8Array for decompression
+        function strToUint8Array(str) {
+            let arr = new Uint8Array(str.length);
+            for (let i = 0; i < str.length; i++) {
+                arr[i] = str.charCodeAt(i);
+            }
+            return arr;
+        }
+
+        let decodedBytes = strToUint8Array(decodedStr2);
+
+        // Step 3: Decompress using gzip
+        let decompressedBytes = pako.ungzip(decodedBytes);
+
+        // Optionally, convert the decompressed bytes back to a string if needed
+        function uint8ArrayToStr(uint8Array) {
+            return new TextDecoder().decode(uint8Array);
+        }
+
+        let resultStr = uint8ArrayToStr(decompressedBytes);
+        return resultStr
+}
+
+        
+        function encode (encodedStr){
+        
+           let resultBytes = new TextEncoder().encode(encodedStr);
+
+        // Step 5: Compress the result string using gzip
+        let compressedBytes = pako.gzip(resultBytes);
+
+        // Step 6: Encode the compressed bytes to a Base64 string
+        function uint8ArrayToBase64(uint8Array) {
+            let binaryStr = '';
+            for (let i = 0; i < uint8Array.length; i++) {
+                binaryStr += String.fromCharCode(uint8Array[i]);
+            }
+            
+            let a = btoa(binaryStr);
+            return btoa(a);
+        }
+
+        let compressedBase64 = uint8ArrayToBase64(compressedBytes);
+        return compressedBase64
+        }
+        
+        
+        
+let decodeBtn = document.getElementById("decode")
+let encodeBtn= document.getElementById("encode")
+let fromCBtn= document.getElementById("fromC")
+let toCBtn= document.getElementById("toC")
+let afkBtn = document.getElementById("afk") 
+        
+let topTb = document.getElementById('top-input');
+let bottomTb = document.getElementById('bottom-input');
+
+ decodeBtn.addEventListener('click', function() {
+   let result = topTb.value;
+   bottomTb.value = decode(result);
+ });   
+ 
+  encodeBtn.addEventListener('click', function() {
+   let result = bottomTb.value;
+   topTb.value = encode(result);
+ });    
+    
+    
+     afkBtn.addEventListener('click', function() {
+            let topInput = bottomTb.value;
+            let updatedText = topInput.replace(/("TimePiece":\s*)[\d.]+/, '$199999');
+            bottomTb.value = updatedText;
+        });
+        
+        
+        toCBtn.addEventListener('click', function() {
+            let topInput = topTb.value;
+            navigator.clipboard.writeText(topInput).then(function() {
+                alert('Text wurde in die Zwischenablage kopiert.');
+            }, function(err) {
+                alert('Fehler beim Kopieren des Textes: ' + err);
+            });
+        });
+        
+        fromCBtn.addEventListener('click', function() {
+            navigator.clipboard.readText().then(function(text) {
+                topTb.value = text;
+            }).catch(function(err) {
+                alert('Fehler beim Einfügen des Textes: ' + err);
+            });
+        });
+    
+    // let result = decode(encodedStringAtoB);
+   //  console.log(result);
+     //console.log(encode(result));
+       
+        
+
+    </script>
+</body>
+</html>
